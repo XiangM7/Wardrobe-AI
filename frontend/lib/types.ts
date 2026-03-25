@@ -49,6 +49,17 @@ export type RecommendationRequest = {
   created_at: string;
 };
 
+export type Feedback = {
+  id: number;
+  user_id: number;
+  outfit_id: number;
+  liked: boolean;
+  saved: boolean;
+  worn: boolean;
+  feedback_text: string | null;
+  created_at: string;
+};
+
 export type OutfitRecommendation = {
   id: number;
   request_id: number;
@@ -69,6 +80,7 @@ export type OutfitRecommendation = {
   top_item: ClothingItem;
   pants_item: ClothingItem;
   shoes_item: ClothingItem;
+  feedback: Feedback | null;
 };
 
 export type RecommendationBundle = {

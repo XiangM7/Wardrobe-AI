@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { OutfitRecommendation } from "@/lib/types";
 import { buildImageUrl, titleCase } from "@/lib/utils";
@@ -34,10 +34,10 @@ export function RecommendationCard({
   recommendation,
   onFeedbackSubmit,
 }: RecommendationCardProps) {
-  const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [worn, setWorn] = useState(false);
-  const [feedbackText, setFeedbackText] = useState("");
+  const [liked, setLiked] = useState(recommendation.feedback?.liked ?? false);
+  const [saved, setSaved] = useState(recommendation.feedback?.saved ?? false);
+  const [worn, setWorn] = useState(recommendation.feedback?.worn ?? false);
+  const [feedbackText, setFeedbackText] = useState(recommendation.feedback?.feedback_text ?? "");
   const [submitting, setSubmitting] = useState(false);
 
   const items = [
@@ -45,6 +45,13 @@ export function RecommendationCard({
     recommendation.pants_item,
     recommendation.shoes_item,
   ];
+
+  useEffect(() => {
+    setLiked(recommendation.feedback?.liked ?? false);
+    setSaved(recommendation.feedback?.saved ?? false);
+    setWorn(recommendation.feedback?.worn ?? false);
+    setFeedbackText(recommendation.feedback?.feedback_text ?? "");
+  }, [recommendation.feedback]);
 
   const handleFeedback = async () => {
     if (!onFeedbackSubmit) {
@@ -54,7 +61,6 @@ export function RecommendationCard({
     setSubmitting(true);
     try {
       await onFeedbackSubmit(recommendation.id, { liked, saved, worn, feedbackText });
-      setFeedbackText("");
     } finally {
       setSubmitting(false);
     }
@@ -69,9 +75,21 @@ export function RecommendationCard({
             <h3 className="mt-4 font-display text-3xl text-ink">
               Score {recommendation.total_score.toFixed(1)}
             </h3>
+            {recommendation.feedback ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {recommendation.feedback.saved ? <span className="status-pill">Saved</span> : null}
+                {recommendation.feedback.liked ? <span className="status-pill">Liked</span> : null}
+                {recommendation.feedback.worn ? <span className="status-pill">Worn</span> : null}
+              </div>
+            ) : null}
             <p className="mt-2 max-w-2xl text-sm leading-7 text-muted">
               {recommendation.reason_text}
             </p>
+            {recommendation.feedback?.feedback_text ? (
+              <p className="mt-2 text-sm leading-7 text-ink">
+                Your note: {recommendation.feedback.feedback_text}
+              </p>
+            ) : null}
           </div>
           <div className="rounded-[22px] bg-[rgba(217,231,223,0.7)] px-4 py-3 text-sm text-ink">
             Generated {new Date(recommendation.created_at).toLocaleString()}
@@ -162,7 +180,7 @@ export function RecommendationCard({
                 onClick={handleFeedback}
                 disabled={submitting}
               >
-                {submitting ? "Sending..." : "Submit feedback"}
+                {submitting ? "Sending..." : recommendation.feedback ? "Update feedback" : "Submit feedback"}
               </button>
             </div>
           ) : null}

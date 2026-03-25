@@ -5,6 +5,7 @@ import type {
   ClothingUpdatePayload,
   CreateUserPayload,
   DemoSeedResponse,
+  Feedback,
   FeedbackPayload,
   RecommendationBundle,
   RecommendationHistoryEntry,
@@ -156,7 +157,7 @@ export async function submitFeedback(userId: number, payload: FeedbackPayload) {
     body: JSON.stringify(payload),
   });
 
-  return parseResponse(response);
+  return parseResponse<Feedback>(response);
 }
 
 export async function seedDemoCloset(): Promise<DemoSeedResponse> {

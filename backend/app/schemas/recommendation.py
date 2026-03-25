@@ -2,6 +2,7 @@ from datetime import datetime
 
 from app.schemas.clothing import ClothingItemRead
 from app.schemas.common import ORMModel
+from app.schemas.feedback import FeedbackRead
 
 
 class RecommendationRequestCreate(ORMModel):
@@ -41,6 +42,7 @@ class OutfitRecommendationRead(ORMModel):
     top_item: ClothingItemRead
     pants_item: ClothingItemRead
     shoes_item: ClothingItemRead
+    feedback: FeedbackRead | None = None
 
 
 class RecommendationResponse(ORMModel):

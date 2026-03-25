@@ -57,3 +57,7 @@ class OutfitRecommendation(Base):
         back_populates="outfit",
         cascade="all, delete-orphan",
     )
+
+    @property
+    def feedback(self) -> "UserFeedback | None":
+        return self.feedback_entries[0] if self.feedback_entries else None

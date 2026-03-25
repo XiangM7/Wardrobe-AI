@@ -7,7 +7,7 @@ import { RecommendationCard } from "@/components/recommendation-card";
 import { createRecommendation, submitFeedback } from "@/lib/api";
 import { SCENE_OPTIONS, STYLE_OPTIONS, WEATHER_OPTIONS } from "@/lib/constants";
 import { useCurrentUserId } from "@/lib/use-current-user";
-import type { RecommendationBundle } from "@/lib/types";
+import type { Feedback, RecommendationBundle } from "@/lib/types";
 
 export default function RecommendPage() {
   const currentUserId = useCurrentUserId();
@@ -58,13 +58,14 @@ export default function RecommendPage() {
     }
 
     try {
-      await submitFeedback(currentUserId, {
+      const feedback = await submitFeedback(currentUserId, {
         outfit_id: outfitId,
         liked: payload.liked,
         saved: payload.saved,
         worn: payload.worn,
         feedback_text: payload.feedbackText,
       });
+      setBundle((current) => applyFeedbackToBundle(current, outfitId, feedback));
       setStatus("Feedback saved for this recommendation.");
     } catch (feedbackError) {
       setError(feedbackError instanceof Error ? feedbackError.message : "Unable to submit feedback.");
@@ -174,4 +175,21 @@ export default function RecommendPage() {
       )}
     </div>
   );
+}
+
+function applyFeedbackToBundle(
+  bundle: RecommendationBundle | null,
+  outfitId: number,
+  feedback: Feedback,
+): RecommendationBundle | null {
+  if (!bundle) {
+    return bundle;
+  }
+
+  return {
+    ...bundle,
+    recommendations: bundle.recommendations.map((recommendation) =>
+      recommendation.id === outfitId ? { ...recommendation, feedback } : recommendation,
+    ),
+  };
 }

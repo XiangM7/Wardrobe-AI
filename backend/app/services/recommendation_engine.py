@@ -106,6 +106,7 @@ def generate_recommendations(
                 joinedload(OutfitRecommendation.top_item),
                 joinedload(OutfitRecommendation.pants_item),
                 joinedload(OutfitRecommendation.shoes_item),
+                selectinload(OutfitRecommendation.feedback_entries),
             )
             .order_by(OutfitRecommendation.total_score.desc())
         )
@@ -122,6 +123,7 @@ def get_recommendation_history(db: Session, user_id: int) -> list[Recommendation
                 selectinload(RecommendationRequest.outfits).joinedload(OutfitRecommendation.top_item),
                 selectinload(RecommendationRequest.outfits).joinedload(OutfitRecommendation.pants_item),
                 selectinload(RecommendationRequest.outfits).joinedload(OutfitRecommendation.shoes_item),
+                selectinload(RecommendationRequest.outfits).selectinload(OutfitRecommendation.feedback_entries),
             )
             .order_by(RecommendationRequest.created_at.desc())
         )

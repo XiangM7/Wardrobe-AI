@@ -17,6 +17,7 @@ Wardrobe AI is a full-stack MVP web app for personalized outfit recommendations 
 - Save recommendation requests and view recommendation history
 - Submit simple feedback on generated outfits
 - Mark outfits as worn and automatically update `last_worn_date`
+- Save favorite outfit recommendations and revisit them from history
 - Load a seeded demo closet for walkthroughs and demos
 
 ## Tech Stack
@@ -105,6 +106,7 @@ Wardrobe AI/
 - `POST /recommend/{user_id}`
 - `GET /recommend/history/{user_id}`
 - `POST /feedback/{user_id}`
+- `GET /feedback/{user_id}`
 
 ### Services
 
@@ -172,7 +174,7 @@ Total Score =
 - `/recommend`
   - generate today's outfit recommendations and submit feedback
 - `/history`
-  - browse previous recommendation bundles
+  - browse previous recommendation bundles and filter to saved outfits
 
 ## Local Setup
 
@@ -310,6 +312,8 @@ These suggestions are browser-side heuristics and can be edited before saving.
 ### Feedback behavior
 
 When `POST /feedback/{user_id}` is submitted with `"worn": true`, the selected top, pants, and shoes will have their `last_worn_date` updated automatically.
+
+`saved`, `liked`, and `worn` feedback is also included in recommendation history responses so the frontend can show saved looks and prior reactions.
 
 ## Verification Notes
 
