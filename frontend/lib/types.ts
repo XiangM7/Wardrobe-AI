@@ -60,6 +60,15 @@ export type Feedback = {
   created_at: string;
 };
 
+export type TryOnPreview = {
+  id: number;
+  user_id: number;
+  outfit_id: number;
+  provider: string;
+  preview_image_path: string;
+  created_at: string;
+};
+
 export type OutfitRecommendation = {
   id: number;
   request_id: number;
@@ -81,6 +90,7 @@ export type OutfitRecommendation = {
   pants_item: ClothingItem;
   shoes_item: ClothingItem;
   feedback: Feedback | null;
+  latest_try_on_preview: TryOnPreview | null;
 };
 
 export type RecommendationBundle = {

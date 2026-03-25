@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import UPLOAD_DIR
 from app.database import create_db_and_tables
-from app.routers import clothing, demo, feedback, profiles, recommendations, users
+from app.routers import clothing, demo, feedback, profiles, recommendations, try_on, users
 
 
 app = FastAPI(
@@ -40,3 +40,4 @@ app.include_router(profiles.router)
 app.include_router(clothing.router)
 app.include_router(recommendations.router)
 app.include_router(feedback.router)
+app.include_router(try_on.router)

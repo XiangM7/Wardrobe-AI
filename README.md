@@ -18,6 +18,7 @@ Wardrobe AI is a full-stack MVP web app for personalized outfit recommendations 
 - Submit simple feedback on generated outfits
 - Mark outfits as worn and automatically update `last_worn_date`
 - Save favorite outfit recommendations and revisit them from history
+- Generate a try-on preview from a saved full-body photo and a recommended outfit
 - Load a seeded demo closet for walkthroughs and demos
 
 ## Tech Stack
@@ -107,6 +108,8 @@ Wardrobe AI/
 - `GET /recommend/history/{user_id}`
 - `POST /feedback/{user_id}`
 - `GET /feedback/{user_id}`
+- `POST /try-on/{user_id}/{outfit_id}`
+- `GET /try-on/{user_id}`
 
 ### Services
 
@@ -172,7 +175,7 @@ Total Score =
 - `/closet`
   - upload clothing items, auto-fill metadata suggestions, and edit metadata
 - `/recommend`
-  - generate today's outfit recommendations and submit feedback
+  - generate today's outfit recommendations, submit feedback, and render try-on previews
 - `/history`
   - browse previous recommendation bundles and filter to saved outfits
 
@@ -308,6 +311,21 @@ These suggestions are browser-side heuristics and can be edited before saving.
   "extra_note": "Need to walk a lot today"
 }
 ```
+
+### Generating a try-on preview
+
+`POST /try-on/{user_id}/{outfit_id}`
+
+This creates a saved try-on preview for a recommended outfit using the user's uploaded full-body profile image.
+
+Current local MVP behavior:
+
+- uses a `mock_svg` provider
+- generates a styled SVG overlay preview
+- stores the result under `backend/uploads/try_on_previews/`
+- returns the preview metadata so the frontend can display it immediately
+
+This is meant as a replaceable first step before plugging in a real virtual try-on model or external API.
 
 ### Feedback behavior
 

@@ -10,6 +10,7 @@ import type {
   RecommendationBundle,
   RecommendationHistoryEntry,
   RecommendationRequestPayload,
+  TryOnPreview,
   User,
   UserProfile,
   UserUpdatePayload,
@@ -148,6 +149,19 @@ export async function createRecommendation(
 export async function getRecommendationHistory(userId: number): Promise<RecommendationHistoryEntry[]> {
   const response = await fetch(`${API_URL}/recommend/history/${userId}`, { cache: "no-store" });
   return parseResponse<RecommendationHistoryEntry[]>(response);
+}
+
+export async function createTryOnPreview(userId: number, outfitId: number): Promise<TryOnPreview> {
+  const response = await fetch(`${API_URL}/try-on/${userId}/${outfitId}`, {
+    method: "POST",
+  });
+
+  return parseResponse<TryOnPreview>(response);
+}
+
+export async function getTryOnPreviews(userId: number): Promise<TryOnPreview[]> {
+  const response = await fetch(`${API_URL}/try-on/${userId}`, { cache: "no-store" });
+  return parseResponse<TryOnPreview[]>(response);
 }
 
 export async function submitFeedback(userId: number, payload: FeedbackPayload) {

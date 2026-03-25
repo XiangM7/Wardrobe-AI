@@ -57,7 +57,16 @@ class OutfitRecommendation(Base):
         back_populates="outfit",
         cascade="all, delete-orphan",
     )
+    try_on_previews: Mapped[list["TryOnPreview"]] = relationship(
+        "TryOnPreview",
+        back_populates="outfit",
+        cascade="all, delete-orphan",
+    )
 
     @property
     def feedback(self) -> "UserFeedback | None":
         return self.feedback_entries[0] if self.feedback_entries else None
+
+    @property
+    def latest_try_on_preview(self) -> "TryOnPreview | None":
+        return self.try_on_previews[0] if self.try_on_previews else None

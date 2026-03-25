@@ -8,6 +8,7 @@ import { buildImageUrl, titleCase } from "@/lib/utils";
 type RecommendationCardProps = {
   recommendation: OutfitRecommendation;
   onFeedbackSubmit?: (outfitId: number, payload: { liked: boolean; saved: boolean; worn: boolean; feedbackText: string }) => Promise<void>;
+  onTryOnGenerate?: (outfitId: number) => Promise<void>;
 };
 
 const scoreLabels: Array<{
@@ -33,12 +34,14 @@ const scoreLabels: Array<{
 export function RecommendationCard({
   recommendation,
   onFeedbackSubmit,
+  onTryOnGenerate,
 }: RecommendationCardProps) {
   const [liked, setLiked] = useState(recommendation.feedback?.liked ?? false);
   const [saved, setSaved] = useState(recommendation.feedback?.saved ?? false);
   const [worn, setWorn] = useState(recommendation.feedback?.worn ?? false);
   const [feedbackText, setFeedbackText] = useState(recommendation.feedback?.feedback_text ?? "");
   const [submitting, setSubmitting] = useState(false);
+  const [generatingTryOn, setGeneratingTryOn] = useState(false);
 
   const items = [
     recommendation.top_item,
@@ -63,6 +66,19 @@ export function RecommendationCard({
       await onFeedbackSubmit(recommendation.id, { liked, saved, worn, feedbackText });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleTryOnGenerate = async () => {
+    if (!onTryOnGenerate) {
+      return;
+    }
+
+    setGeneratingTryOn(true);
+    try {
+      await onTryOnGenerate(recommendation.id);
+    } finally {
+      setGeneratingTryOn(false);
     }
   };
 
@@ -182,6 +198,53 @@ export function RecommendationCard({
               >
                 {submitting ? "Sending..." : recommendation.feedback ? "Update feedback" : "Submit feedback"}
               </button>
+            </div>
+          ) : null}
+
+          {onTryOnGenerate || recommendation.latest_try_on_preview ? (
+            <div className="panel-muted p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h4 className="text-sm font-semibold uppercase tracking-[0.24em] text-muted">
+                    Try-On Preview
+                  </h4>
+                  <p className="mt-2 text-sm leading-7 text-muted">
+                    Generate a styled overlay preview using your saved full-body image and this recommended outfit.
+                  </p>
+                </div>
+                {onTryOnGenerate ? (
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={handleTryOnGenerate}
+                    disabled={generatingTryOn}
+                  >
+                    {generatingTryOn
+                      ? "Rendering..."
+                      : recommendation.latest_try_on_preview
+                        ? "Regenerate preview"
+                        : "Generate preview"}
+                  </button>
+                ) : null}
+              </div>
+
+              {recommendation.latest_try_on_preview ? (
+                <div className="mt-4 overflow-hidden rounded-[22px] border border-line bg-white">
+                  <img
+                    src={buildImageUrl(recommendation.latest_try_on_preview.preview_image_path)}
+                    alt="Virtual try-on preview"
+                    className="w-full object-cover"
+                  />
+                  <div className="border-t border-line px-4 py-3 text-sm text-muted">
+                    Generated {new Date(recommendation.latest_try_on_preview.created_at).toLocaleString()} with{" "}
+                    {recommendation.latest_try_on_preview.provider}
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-4 rounded-[22px] border border-dashed border-line bg-white/75 px-4 py-6 text-sm text-muted">
+                  No try-on preview yet. Generate one from this recommendation card.
+                </div>
+              )}
             </div>
           ) : null}
         </div>

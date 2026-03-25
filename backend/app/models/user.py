@@ -42,3 +42,8 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    try_on_previews: Mapped[list["TryOnPreview"]] = relationship(
+        "TryOnPreview",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )

@@ -3,7 +3,7 @@ from collections.abc import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-from app.config import CLOTHING_UPLOAD_DIR, DATABASE_URL, PROFILE_UPLOAD_DIR
+from app.config import CLOTHING_UPLOAD_DIR, DATABASE_URL, PROFILE_UPLOAD_DIR, TRY_ON_UPLOAD_DIR
 
 
 class Base(DeclarativeBase):
@@ -24,8 +24,9 @@ def get_db() -> Generator[Session, None, None]:
 
 
 def create_db_and_tables() -> None:
-    from app.models import clothing, feedback, profile, recommendation, user  # noqa: F401
+    from app.models import clothing, feedback, profile, recommendation, try_on, user  # noqa: F401
 
     PROFILE_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     CLOTHING_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    TRY_ON_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     Base.metadata.create_all(bind=engine)

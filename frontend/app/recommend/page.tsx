@@ -4,10 +4,10 @@ import { useState } from "react";
 
 import { EmptyUserState } from "@/components/empty-user-state";
 import { RecommendationCard } from "@/components/recommendation-card";
-import { createRecommendation, submitFeedback } from "@/lib/api";
+import { createRecommendation, createTryOnPreview, submitFeedback } from "@/lib/api";
 import { SCENE_OPTIONS, STYLE_OPTIONS, WEATHER_OPTIONS } from "@/lib/constants";
 import { useCurrentUserId } from "@/lib/use-current-user";
-import type { Feedback, RecommendationBundle } from "@/lib/types";
+import type { Feedback, RecommendationBundle, TryOnPreview } from "@/lib/types";
 
 export default function RecommendPage() {
   const currentUserId = useCurrentUserId();
@@ -69,6 +69,20 @@ export default function RecommendPage() {
       setStatus("Feedback saved for this recommendation.");
     } catch (feedbackError) {
       setError(feedbackError instanceof Error ? feedbackError.message : "Unable to submit feedback.");
+    }
+  };
+
+  const handleTryOnGenerate = async (outfitId: number) => {
+    if (!currentUserId) {
+      return;
+    }
+
+    try {
+      const preview = await createTryOnPreview(currentUserId, outfitId);
+      setBundle((current) => applyTryOnPreviewToBundle(current, outfitId, preview));
+      setStatus("Try-on preview generated.");
+    } catch (tryOnError) {
+      setError(tryOnError instanceof Error ? tryOnError.message : "Unable to generate a try-on preview.");
     }
   };
 
@@ -164,6 +178,7 @@ export default function RecommendPage() {
                 key={recommendation.id}
                 recommendation={recommendation}
                 onFeedbackSubmit={handleFeedbackSubmit}
+                onTryOnGenerate={handleTryOnGenerate}
               />
             ))}
           </div>
@@ -190,6 +205,25 @@ function applyFeedbackToBundle(
     ...bundle,
     recommendations: bundle.recommendations.map((recommendation) =>
       recommendation.id === outfitId ? { ...recommendation, feedback } : recommendation,
+    ),
+  };
+}
+
+function applyTryOnPreviewToBundle(
+  bundle: RecommendationBundle | null,
+  outfitId: number,
+  preview: TryOnPreview,
+): RecommendationBundle | null {
+  if (!bundle) {
+    return bundle;
+  }
+
+  return {
+    ...bundle,
+    recommendations: bundle.recommendations.map((recommendation) =>
+      recommendation.id === outfitId
+        ? { ...recommendation, latest_try_on_preview: preview }
+        : recommendation,
     ),
   };
 }
