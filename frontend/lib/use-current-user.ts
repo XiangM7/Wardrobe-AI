@@ -27,6 +27,15 @@ export function setStoredUserId(userId: number): void {
   window.dispatchEvent(new Event(USER_CHANGED_EVENT));
 }
 
+export function clearStoredUserId(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.removeItem(CURRENT_USER_STORAGE_KEY);
+  window.dispatchEvent(new Event(USER_CHANGED_EVENT));
+}
+
 export function useCurrentUserId(): number | null {
   const [userId, setUserId] = useState<number | null>(null);
 

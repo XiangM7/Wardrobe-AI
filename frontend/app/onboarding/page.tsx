@@ -2,9 +2,9 @@
 
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 
-import { createUser, getProfile, getUser, upsertProfile } from "@/lib/api";
+import { createUser, getProfile, getUser, seedDemoCloset, updateUser, upsertProfile } from "@/lib/api";
 import { GOAL_OPTIONS, STYLE_OPTIONS } from "@/lib/constants";
-import { setStoredUserId, useCurrentUserId } from "@/lib/use-current-user";
+import { clearStoredUserId, setStoredUserId, useCurrentUserId } from "@/lib/use-current-user";
 import { buildImageUrl, csvToArray } from "@/lib/utils";
 import type { User, UserProfile } from "@/lib/types";
 
@@ -30,12 +30,30 @@ export default function OnboardingPage() {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingDemo, setIsLoadingDemo] = useState(false);
+
+  const resetDraft = () => {
+    setActiveUser(null);
+    setExistingProfile(null);
+    setName("");
+    setEmail("");
+    setStylePreferences([]);
+    setBodyGoals([]);
+    setColorPreferences("");
+    setAvoidTags("");
+    setNotes("");
+    setFullBodyImage(null);
+    setPreviewUrl("");
+  };
 
   useEffect(() => {
     let cancelled = false;
 
     async function hydrateExistingProfile() {
       if (!currentUserId) {
+        if (!cancelled) {
+          resetDraft();
+        }
         return;
       }
 
@@ -103,12 +121,21 @@ export default function OnboardingPage() {
     setIsSubmitting(true);
 
     try {
-      const user =
-        activeUser ||
-        (await createUser({
-          name: name.trim(),
-          email: email.trim(),
-        }));
+      const trimmedName = name.trim();
+      const trimmedEmail = email.trim();
+      if (!trimmedName || !trimmedEmail) {
+        throw new Error("Name and email are required.");
+      }
+
+      const user = activeUser
+        ? await updateUser(activeUser.id, {
+            name: trimmedName,
+            email: trimmedEmail,
+          })
+        : await createUser({
+            name: trimmedName,
+            email: trimmedEmail,
+          });
 
       const formData = new FormData();
       formData.append("style_preferences", stylePreferences.join(", "));
@@ -124,11 +151,38 @@ export default function OnboardingPage() {
       setStoredUserId(user.id);
       setActiveUser(user);
       setExistingProfile(profile);
-      setStatus(`Profile ready for ${user.name}. You can move on to the closet page now.`);
+      setStatus(
+        activeUser
+          ? `Profile updated for ${user.name}.`
+          : `Profile ready for ${user.name}. You can move on to the closet page now.`,
+      );
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Unable to save the onboarding flow.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCreateAnotherProfile = () => {
+    clearStoredUserId();
+    resetDraft();
+    setStatus("Ready to create a new local profile.");
+    setError("");
+  };
+
+  const handleLoadDemo = async () => {
+    setIsLoadingDemo(true);
+    setError("");
+    setStatus("");
+
+    try {
+      const payload = await seedDemoCloset();
+      setStoredUserId(payload.user.id);
+      setStatus(`${payload.message} ${payload.clothing_count} items are ready for demo use.`);
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "Unable to load the demo closet.");
+    } finally {
+      setIsLoadingDemo(false);
     }
   };
 
@@ -183,7 +237,6 @@ export default function OnboardingPage() {
               placeholder="Alex Kim"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              disabled={Boolean(activeUser)}
             />
           </label>
 
@@ -194,7 +247,6 @@ export default function OnboardingPage() {
               placeholder="alex@example.com"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              disabled={Boolean(activeUser)}
             />
           </label>
 
@@ -289,11 +341,17 @@ export default function OnboardingPage() {
             onClick={handleSubmit}
             disabled={
               isSubmitting ||
-              (!activeUser && (!name.trim() || !email.trim())) ||
-              (!activeUser && stylePreferences.length === 0)
+              !name.trim() ||
+              !email.trim()
             }
           >
-            {isSubmitting ? "Saving..." : activeUser ? "Update profile" : "Create profile"}
+            {isSubmitting ? "Saving..." : activeUser ? "Save changes" : "Create profile"}
+          </button>
+          <button type="button" className="secondary-button" onClick={handleCreateAnotherProfile}>
+            Start new local profile
+          </button>
+          <button type="button" className="secondary-button" onClick={handleLoadDemo} disabled={isLoadingDemo}>
+            {isLoadingDemo ? "Loading demo..." : "Load demo closet"}
           </button>
           <div className="rounded-full border border-line px-4 py-3 text-sm text-muted">
             Color preferences saved as: {csvToArray(colorPreferences).join(", ") || "none"}

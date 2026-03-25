@@ -5,14 +5,19 @@ Wardrobe AI is a full-stack MVP web app for personalized outfit recommendations 
 ## MVP Features
 
 - Create a simple local user profile
+- Switch between multiple local profiles
+- Edit existing user name and email
 - Upload one full-body image during onboarding
 - Save style preferences, body goals, color preferences, avoid tags, and notes
 - Upload closet items for `tops`, `pants`, and `shoes`
+- Auto-fill clothing metadata suggestions from the uploaded item image
 - Edit clothing metadata after upload
 - Generate top 3 outfit combinations from the user's own closet
 - Show score breakdowns and short explanation text for every recommendation
 - Save recommendation requests and view recommendation history
 - Submit simple feedback on generated outfits
+- Mark outfits as worn and automatically update `last_worn_date`
+- Load a seeded demo closet for walkthroughs and demos
 
 ## Tech Stack
 
@@ -87,7 +92,10 @@ Wardrobe AI/
 ### Routers
 
 - `POST /users`
+- `GET /users`
 - `GET /users/{user_id}`
+- `PUT /users/{user_id}`
+- `POST /demo/seed`
 - `POST /profiles/{user_id}`
 - `GET /profiles/{user_id}`
 - `POST /clothing/{user_id}`
@@ -158,9 +166,9 @@ Total Score =
 - `/`
   - landing page with overview and call to action
 - `/onboarding`
-  - create local profile, upload full-body image, save preferences and goals
+  - create or edit local profile, upload full-body image, save preferences and goals
 - `/closet`
-  - upload clothing items and edit metadata
+  - upload clothing items, auto-fill metadata suggestions, and edit metadata
 - `/recommend`
   - generate today's outfit recommendations and submit feedback
 - `/history`
@@ -200,6 +208,17 @@ npm run dev
 
 Frontend runs at `http://localhost:3000`.
 
+## Demo Flow
+
+If you want to skip manual setup, use the `Load demo closet` button on the landing page or onboarding page.
+
+That will:
+
+- create or reuse a seeded demo user
+- create a seeded user profile
+- create a starter closet with tops, pants, and shoes
+- set that user as the active local profile in the frontend
+
 ## API Notes
 
 ### Creating a user
@@ -212,6 +231,24 @@ Frontend runs at `http://localhost:3000`.
   "email": "alex@example.com"
 }
 ```
+
+### Listing and updating users
+
+- `GET /users`
+- `PUT /users/{user_id}`
+
+```json
+{
+  "name": "Alex Kim",
+  "email": "alex@example.com"
+}
+```
+
+### Loading demo data
+
+`POST /demo/seed`
+
+Returns a demo user plus the number of seeded clothing items.
 
 ### Creating or updating a profile
 
@@ -246,6 +283,17 @@ Use `multipart/form-data` with:
 - `is_favorite`
 - `last_worn_date`
 
+When an item image is selected in the frontend closet flow, the app will automatically suggest:
+
+- `primary_color`
+- `secondary_color`
+- `style_tags`
+- `season_tags`
+- `formality`
+- `fit`
+
+These suggestions are browser-side heuristics and can be edited before saving.
+
 ### Requesting recommendations
 
 `POST /recommend/{user_id}`
@@ -259,15 +307,31 @@ Use `multipart/form-data` with:
 }
 ```
 
+### Feedback behavior
+
+When `POST /feedback/{user_id}` is submitted with `"worn": true`, the selected top, pants, and shoes will have their `last_worn_date` updated automatically.
+
 ## Verification Notes
 
 - Backend Python source was syntax-checked with:
 
 ```bash
-python3 -m compileall backend/app
+python3 -m compileall backend/app backend/tests
 ```
 
-- Frontend dependency installation and full Next.js build were not run in this environment because project packages were not installed yet.
+- Backend unit tests were run with:
+
+```bash
+cd backend
+python3 -m unittest discover -s tests -v
+```
+
+- Frontend production build was run with:
+
+```bash
+cd frontend
+npm run build
+```
 
 ## Future Improvements
 

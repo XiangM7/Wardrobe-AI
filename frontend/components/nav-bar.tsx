@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { LocalProfileSwitcher } from "@/components/local-profile-switcher";
 import { useCurrentUserId } from "@/lib/use-current-user";
 
 const navItems = [
@@ -49,8 +50,9 @@ export function NavBar() {
             })}
           </nav>
 
+          <LocalProfileSwitcher />
           <div className="status-pill">
-            {currentUserId ? `Local profile: User #${currentUserId}` : "No local profile selected yet"}
+            {currentUserId ? `Active profile: User #${currentUserId}` : "No local profile selected yet"}
           </div>
         </div>
       </div>

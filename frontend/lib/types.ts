@@ -5,6 +5,11 @@ export type User = {
   created_at: string;
 };
 
+export type UserUpdatePayload = {
+  name: string;
+  email: string;
+};
+
 export type UserProfile = {
   id: number;
   user_id: number;
@@ -130,4 +135,11 @@ export type FeedbackPayload = {
   saved: boolean;
   worn: boolean;
   feedback_text?: string;
+};
+
+export type DemoSeedResponse = {
+  user: User;
+  created: boolean;
+  clothing_count: number;
+  message: string;
 };

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { LandingActions } from "@/components/landing-actions";
 
 const featureBlocks = [
   {
@@ -30,14 +30,7 @@ export default function LandingPage() {
               work, dates, or everyday outings.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/onboarding" className="primary-button">
-                Start onboarding
-              </Link>
-              <Link href="/recommend" className="secondary-button">
-                View today outfit
-              </Link>
-            </div>
+            <LandingActions />
           </div>
 
           <div className="grid gap-4 self-end">

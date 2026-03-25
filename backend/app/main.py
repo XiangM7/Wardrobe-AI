@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import UPLOAD_DIR
 from app.database import create_db_and_tables
-from app.routers import clothing, feedback, profiles, recommendations, users
+from app.routers import clothing, demo, feedback, profiles, recommendations, users
 
 
 app = FastAPI(
@@ -35,6 +35,7 @@ def healthcheck() -> dict[str, str]:
 
 
 app.include_router(users.router)
+app.include_router(demo.router)
 app.include_router(profiles.router)
 app.include_router(clothing.router)
 app.include_router(recommendations.router)

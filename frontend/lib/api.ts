@@ -4,12 +4,14 @@ import type {
   ClothingItem,
   ClothingUpdatePayload,
   CreateUserPayload,
+  DemoSeedResponse,
   FeedbackPayload,
   RecommendationBundle,
   RecommendationHistoryEntry,
   RecommendationRequestPayload,
   User,
   UserProfile,
+  UserUpdatePayload,
 } from "@/lib/types";
 
 async function parseResponse<T>(response: Response): Promise<T> {
@@ -45,8 +47,23 @@ export async function createUser(payload: CreateUserPayload): Promise<User> {
   return parseResponse<User>(response);
 }
 
+export async function getUsers(): Promise<User[]> {
+  const response = await fetch(`${API_URL}/users`, { cache: "no-store" });
+  return parseResponse<User[]>(response);
+}
+
 export async function getUser(userId: number): Promise<User> {
   const response = await fetch(`${API_URL}/users/${userId}`, { cache: "no-store" });
+  return parseResponse<User>(response);
+}
+
+export async function updateUser(userId: number, payload: UserUpdatePayload): Promise<User> {
+  const response = await fetch(`${API_URL}/users/${userId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
   return parseResponse<User>(response);
 }
 
@@ -140,4 +157,12 @@ export async function submitFeedback(userId: number, payload: FeedbackPayload) {
   });
 
   return parseResponse(response);
+}
+
+export async function seedDemoCloset(): Promise<DemoSeedResponse> {
+  const response = await fetch(`${API_URL}/demo/seed`, {
+    method: "POST",
+  });
+
+  return parseResponse<DemoSeedResponse>(response);
 }

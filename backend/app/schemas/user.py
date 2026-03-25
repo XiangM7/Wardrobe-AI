@@ -10,8 +10,19 @@ class UserCreate(ORMModel):
     email: EmailStr
 
 
+class UserUpdate(ORMModel):
+    name: str
+    email: EmailStr
+
+
 class UserRead(ORMModel):
     id: int
     name: str
     email: EmailStr
     created_at: datetime
+
+
+class UserSummary(ORMModel):
+    id: int
+    name: str
+    email: EmailStr

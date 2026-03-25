@@ -6,6 +6,7 @@ import { ClothingItemCard } from "@/components/clothing-item-card";
 import { EmptyUserState } from "@/components/empty-user-state";
 import { createClothingItem, deleteClothingItem, getClothingItems, updateClothingItem } from "@/lib/api";
 import { CATEGORY_OPTIONS, FIT_OPTIONS, FORMALITY_OPTIONS, SEASON_SUGGESTIONS } from "@/lib/constants";
+import { extractClothingMetadata } from "@/lib/metadata-extractor";
 import { useCurrentUserId } from "@/lib/use-current-user";
 import { csvToArray } from "@/lib/utils";
 import type { ClothingFormValues, ClothingItem, ClothingUpdatePayload } from "@/lib/types";
@@ -34,6 +35,8 @@ export default function ClosetPage() {
   const [styleTagsInput, setStyleTagsInput] = useState("");
   const [seasonTagsInput, setSeasonTagsInput] = useState("");
   const [form, setForm] = useState<ClothingFormValues>(initialFormState);
+  const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
+  const [autoFillSummary, setAutoFillSummary] = useState("");
 
   useEffect(() => {
     async function loadCloset() {
@@ -90,12 +93,49 @@ export default function ClosetPage() {
       setForm(initialFormState);
       setStyleTagsInput("");
       setSeasonTagsInput("");
+      setAutoFillSummary("");
       await refreshCloset();
       setStatus("Closet item uploaded and saved.");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Unable to add closet item.");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleAutoFillFromImage = async (selectedFile: File) => {
+    setIsAnalyzingImage(true);
+    setError("");
+
+    try {
+      const metadata = await extractClothingMetadata(selectedFile, form.category);
+      setForm((current) => ({
+        ...current,
+        image: selectedFile,
+        primary_color: current.primary_color || metadata.primaryColor,
+        secondary_color: current.secondary_color || metadata.secondaryColor,
+        formality:
+          current.formality && current.formality !== initialFormState.formality
+            ? current.formality
+            : metadata.formality,
+        fit:
+          current.fit && current.fit !== initialFormState.fit
+            ? current.fit
+            : metadata.fit,
+      }));
+      setStyleTagsInput((current) => current || metadata.styleTags.join(", "));
+      setSeasonTagsInput((current) => current || metadata.seasonTags.join(", "));
+      setAutoFillSummary(
+        `Auto-filled ${metadata.primaryColor}${metadata.secondaryColor ? ` + ${metadata.secondaryColor}` : ""}, ${metadata.styleTags.join(", ")}, ${metadata.seasonTags.join(", ")}.`,
+      );
+    } catch (analysisError) {
+      setError(
+        analysisError instanceof Error
+          ? analysisError.message
+          : "Unable to analyze the selected image.",
+      );
+    } finally {
+      setIsAnalyzingImage(false);
     }
   };
 
@@ -165,9 +205,13 @@ export default function ClosetPage() {
               type="file"
               accept="image/*"
               className="field-input"
-              onChange={(event) =>
-                setForm((current) => ({ ...current, image: event.target.files?.[0] || null }))
-              }
+              onChange={async (event) => {
+                const selectedFile = event.target.files?.[0] || null;
+                setForm((current) => ({ ...current, image: selectedFile }));
+                if (selectedFile) {
+                  await handleAutoFillFromImage(selectedFile);
+                }
+              }}
             />
           </label>
 
@@ -306,9 +350,21 @@ export default function ClosetPage() {
           >
             {submitting ? "Uploading..." : "Upload item"}
           </button>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => form.image && handleAutoFillFromImage(form.image)}
+            disabled={!form.image || isAnalyzingImage}
+          >
+            {isAnalyzingImage ? "Analyzing..." : "Re-analyze image"}
+          </button>
           {status ? <div className="status-pill">{status}</div> : null}
+          {autoFillSummary ? <div className="status-pill">{autoFillSummary}</div> : null}
           {error ? <div className="rounded-full bg-[#f7d7d7] px-4 py-2 text-sm text-[#8a1f1f]">{error}</div> : null}
         </div>
+        <p className="mt-4 text-sm text-muted">
+          Uploading an image now auto-fills color, style tags, season tags, and a suggested formality. You can edit everything before saving.
+        </p>
       </section>
 
       <section className="space-y-5">
