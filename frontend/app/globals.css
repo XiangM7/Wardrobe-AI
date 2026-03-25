@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --canvas: #f4ede2;
+  --paper: rgba(255, 250, 242, 0.88);
+  --ink: #1f2a2e;
+  --muted: #6e6a63;
+  --accent: #c86b45;
+  --accent-deep: #9b4827;
+  --mint: #d9e7df;
+  --sand: #ead7c2;
+  --line: rgba(80, 68, 57, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(200, 107, 69, 0.18), transparent 34%),
+    radial-gradient(circle at left center, rgba(42, 79, 69, 0.14), transparent 28%),
+    linear-gradient(180deg, #f7f1e7 0%, #f3ebdf 45%, #f0e7db 100%);
+  color: var(--ink);
+  font-family: "Avenir Next", Avenir, "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(200, 107, 69, 0.18);
+}
+
+@layer components {
+  .page-wrap {
+    @apply mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8;
+  }
+
+  .panel {
+    @apply rounded-[28px] border border-line bg-paper shadow-soft backdrop-blur;
+  }
+
+  .panel-muted {
+    @apply rounded-[24px] border border-line bg-white/70;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center rounded-full border border-line bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-muted;
+  }
+
+  .section-title {
+    @apply font-display text-3xl text-ink sm:text-4xl;
+  }
+
+  .field-label {
+    @apply mb-2 block text-sm font-semibold text-ink;
+  }
+
+  .field-input {
+    @apply w-full rounded-2xl border border-line bg-white/80 px-4 py-3 text-sm text-ink outline-none transition;
+  }
+
+  .field-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(200, 107, 69, 0.2);
+  }
+
+  .primary-button {
+    @apply inline-flex items-center justify-center rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accentDeep disabled:cursor-not-allowed disabled:opacity-55;
+  }
+
+  .secondary-button {
+    @apply inline-flex items-center justify-center rounded-full border border-line bg-white/85 px-5 py-3 text-sm font-semibold text-ink transition hover:border-accent hover:text-accent;
+  }
+
+  .status-pill {
+    @apply inline-flex items-center rounded-full bg-mint px-3 py-1 text-xs font-semibold text-ink;
+  }
+}

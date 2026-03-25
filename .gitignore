@@ -1,0 +1,14 @@
+.DS_Store
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+backend/wardrobe_ai.db
+backend/uploads/profile_images/*
+backend/uploads/clothing_items/*
+!backend/uploads/profile_images/.gitkeep
+!backend/uploads/clothing_items/.gitkeep
+frontend/.next/
+frontend/node_modules/
+frontend/out/
