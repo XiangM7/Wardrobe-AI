@@ -130,7 +130,7 @@ class FeedbackServiceTests(unittest.TestCase):
             ),
         )
         feedback_rows = list(self.db.scalars(select(UserFeedback)))
-        self.assertEqual(len(feedback_rows), 1)
+        self.assertEqual(len(feedback_rows), 1) 
         self.assertEqual(updated_feedback.feedback_text, "Updating feedback")
 
 
